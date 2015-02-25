@@ -6,8 +6,8 @@ import os
 # Main method
 def main():
     inputDir = ''
-    verbose = False
-    try: opts, args = getopt.getopt(sys.argv[1:], 'vhi:', ['help', 'verbose', 'input='])
+    map = {}
+    try: opts, args = getopt.getopt(sys.argv[1:], 'hi:', ['help', 'verbose', 'input='])
     except getopt.GetoptError as err:
         # print help information and exit:
         print(err) # will print something like "option -a not recognized"
@@ -17,9 +17,7 @@ def main():
     output = None
     verbose = False
     for o, a in opts:
-        if v == "-v":
-            verbose = True
-        elif o in ("-h", "--help"):
+        if o in ("-h", "--help"):
             usage()
             sys.exit()
         else:
@@ -29,19 +27,29 @@ def main():
 
     for root, dirs, files in os.walk(directory, topdown=False):
         for name in files:
-            assert os.path.exists(os.path.join(root, name))
-            file_object = open(os.path.join(root, name), 'r')
+            file = os.path.join(root, name)
+            assert os.path.exists(file)
+            file_object = open(file, 'r')
             content = file_object.read()
             hash_object = hashlib.sha1(content)
             hex_dig = hash_object.hexdigest()
-            print 'Hash: ' + hex_dig + ' for ' + name
+            if hex_dig not in map:
+                map[hex_dig] = []
+            map[hex_dig].append(file)
+
+            # print 'Hash: ' + hex_dig + ' for ' + name
             # print(os.path.join(root, name))
         # for name in dirs:
             # print(os.path.join(root, name))
-    
+    for key in map:
+        if len(map[key]) > 1:
+            print 'These files are identical'
+            for entry in map[key]:
+                print '\t' + entry
 
 def usage():
-    print "Usage"
+    print "Usage:"
+    print "python dvla.py [--help] directory"
 
 def get_directory(dir_names):
     dir_name = None;
@@ -54,9 +62,6 @@ def get_directory(dir_names):
             assert False, dir_name + ' is either not a directory or does not exist!'
     else:
         assert False, 'no directory given to traverse'
-
-
-
 
 
 
