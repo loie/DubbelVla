@@ -1,7 +1,9 @@
 import hashlib
 import sys
 import getopt
+import os
 
+# Main method
 def main():
     inputDir = ''
     verbose = False
@@ -20,41 +22,49 @@ def main():
         elif o in ("-h", "--help"):
             usage()
             sys.exit()
-
         else:
             assert False, "unhandled option"
+
+    directory = get_directory(args);
+
+    for root, dirs, files in os.walk(directory, topdown=False):
+        for name in files:
+            assert os.path.exists(os.path.join(root, name))
+            file_object = open(os.path.join(root, name), 'r')
+            content = file_object.read()
+            hash_object = hashlib.sha1(content)
+            hex_dig = hash_object.hexdigest()
+            print 'Hash: ' + hex_dig + ' for ' + name
+            # print(os.path.join(root, name))
+        # for name in dirs:
+            # print(os.path.join(root, name))
+    
 
 def usage():
     print "Usage"
 
+def get_directory(dir_names):
+    dir_name = None;
+    if len(dir_names) > 0:
+        dir_name = os.path.abspath(dir_names[0])
+        print dir_name
+        if os.path.exists(dir_name) and os.path.isdir(dir_name):
+            return dir_name
+        else:
+            assert False, dir_name + ' is either not a directory or does not exist!'
+    else:
+        assert False, 'no directory given to traverse'
+
+
+
+
+
+
 if __name__ == "__main__":
     main()
-
-
-# try:
-#     opts, args = getopt.getopt(argv,"hi:",["ifile=","ofile="])
-#    except getopt.GetoptError:
-#       print 'test.py -i <inputfile> -o <outputfile>'
-#       sys.exit(2)
-#    for opt, arg in opts:
-#       if opt == '-h':
-#          print 'test.py -i <inputfile> -o <outputfile>'
-#          sys.exit()
-#       elif opt in ("-i", "--ifile"):
-#          inputfile = arg
-
-#    print 'Input file is "', inputfile
-#    print 'Output file is "', outputfile
-
-# if __name__ == "__main__":
-#    main(sys.argv[1:])
 
 
 # print sys.argv[1];
 # if (len(sys))
 # # print 'Number of arguments:', len(sys.argv), 'arguments.'
 # # print 'Argument List:', str(sys.argv)
-
-# hash_object = hashlib.sha1(b'Hello World')
-# hex_dig = hash_object.hexdigest()
-# print(hex_dig)
